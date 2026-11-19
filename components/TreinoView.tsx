@@ -1,22 +1,28 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Exercicio, Treino } from "@/data/treinos";
-import { tema } from "@/lib/tema";
+import { diaCompleto, formatarDescanso, temaClasse } from "@/lib/tema";
+import { Relogio, Visto, Voltar } from "./Icones";
 import Video from "./Video";
 
 type Feitas = Record<string, boolean[]>;
 type Temporizador = { fim: number; total: number; nome: string } | null;
 
-function formatar(seg: number) {
-  const m = Math.floor(seg / 60);
-  const s = seg % 60;
-  return `${m}:${s.toString().padStart(2, "0")}`;
-}
+const relogio = (seg: number) => `${Math.floor(seg / 60)}:${String(seg % 60).padStart(2, "0")}`;
 
 export default function TreinoView({ treino }: { treino: Treino }) {
-  const c = tema[treino.slug];
   const chave = `treino-do-pai:${treino.slug}`;
+
+  // ── Barra de navegação: o título aparece ao fazer scroll (como no iOS) ──
+  const [compacto, setCompacto] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setCompacto(window.scrollY > 60);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   // ── Séries feitas (localStorage) ──
   const [feitas, setFeitas] = useState<Feitas>({});
@@ -53,6 +59,7 @@ export default function TreinoView({ treino }: { treino: Treino }) {
     (s, e) => s + (feitas[e.id]?.slice(0, e.series).filter(Boolean).length ?? 0),
     0,
   );
+  const concluido = totalSeries > 0 && seriesFeitas === totalSeries;
 
   // ── Temporizador de descanso ──
   const [temp, setTemp] = useState<Temporizador>(null);
@@ -104,7 +111,8 @@ export default function TreinoView({ treino }: { treino: Treino }) {
     if (!ex.descansoSeg) return;
     try {
       // O som só pode ser ativado com um toque do utilizador (regra dos browsers).
-      const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const AC =
+        window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!audioRef.current && AC) audioRef.current = new AC();
       audioRef.current?.resume();
     } catch {}
@@ -113,161 +121,198 @@ export default function TreinoView({ treino }: { treino: Treino }) {
   };
 
   return (
-    <>
-      {/* Progresso */}
-      <div className="mt-5 rounded-2xl bg-white p-4 shadow-sm dark:bg-stone-900">
-        <div className="flex items-baseline justify-between text-lg">
-          <span className="font-semibold">Progresso</span>
-          <span className="tabular-nums text-stone-600 dark:text-stone-300">
-            {seriesFeitas} / {totalSeries} séries
-          </span>
-        </div>
-        <div className="mt-2 h-3 overflow-hidden rounded-full bg-stone-200 dark:bg-stone-800">
-          <div
-            className={`h-full ${c.fundo} transition-all`}
-            style={{ width: `${totalSeries ? (seriesFeitas / totalSeries) * 100 : 0}%` }}
-          />
-        </div>
-        {seriesFeitas === totalSeries && totalSeries > 0 && (
-          <p className={`mt-3 text-xl font-bold ${c.texto}`}>🎉 Treino concluído! Muito bem!</p>
-        )}
-      </div>
-
-      {/* Exercícios */}
-      <ol className="mt-5 space-y-5">
-        {treino.exercicios.map((ex, idx) => (
-          <CartaoExercicio
-            key={ex.id}
-            ex={ex}
-            numero={idx + 1}
-            slug={treino.slug}
-            feitas={feitas[ex.id] ?? []}
-            onAlternar={(i) => alternar(ex, i)}
-            onDescanso={() => iniciarDescanso(ex)}
-          />
-        ))}
-      </ol>
-
-      <button
-        onClick={recomecar}
-        className="mt-8 w-full rounded-2xl border-2 border-stone-300 bg-white py-4 text-xl font-semibold active:bg-stone-100 dark:border-stone-700 dark:bg-stone-900 dark:active:bg-stone-800"
+    <div className={temaClasse[treino.slug]}>
+      {/* Barra de navegação */}
+      <nav
+        className={`sticky top-0 z-40 pt-[env(safe-area-inset-top)] backdrop-blur-xl backdrop-saturate-150 transition-colors ${
+          compacto ? "border-b border-sep bg-bar" : "border-b border-transparent bg-bg"
+        }`}
       >
-        ↺ Recomeçar treino
-      </button>
-
-      {/* Barra do temporizador */}
-      {(temp || terminou) && (
-        <div className="fixed inset-x-0 bottom-0 z-50 px-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
-          <div
-            className={`mx-auto flex max-w-xl items-center gap-4 rounded-3xl p-4 text-white shadow-2xl ${
-              terminou ? "bg-stone-900 dark:bg-white dark:text-stone-900" : c.fundo
+        <div className="relative mx-auto flex h-11 max-w-xl items-center px-2">
+          <Link href="/" className="flex items-center text-[17px] text-accent active:opacity-50">
+            <Voltar className="h-6 w-6" />
+            <span className="-ml-0.5">Treinos</span>
+          </Link>
+          <p
+            className={`pointer-events-none absolute inset-x-0 text-center text-[17px] font-semibold transition-opacity ${
+              compacto ? "opacity-100" : "opacity-0"
             }`}
           >
+            {treino.titulo}
+          </p>
+        </div>
+      </nav>
+
+      <main className="mx-auto max-w-xl px-4 pb-40">
+        {/* Título grande */}
+        <header className="pt-1">
+          <p className="text-[13px] font-semibold uppercase tracking-wide text-accent">{diaCompleto[treino.dia]}</p>
+          <h1 className="text-[34px] font-bold leading-tight tracking-tight">{treino.titulo}</h1>
+          {treino.descricao && <p className="text-[17px] text-label-2">{treino.descricao}</p>}
+        </header>
+
+        {/* Progresso */}
+        <section className="mt-6 rounded-[14px] bg-card p-4">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[17px] font-semibold">{concluido ? "Treino concluído" : "Progresso"}</span>
+            <span className="text-[15px] tabular-nums text-label-2">
+              {seriesFeitas} de {totalSeries} séries
+            </span>
+          </div>
+          <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-fill">
+            <div
+              className="h-full rounded-full bg-accent transition-[width] duration-300"
+              style={{ width: `${totalSeries ? (seriesFeitas / totalSeries) * 100 : 0}%` }}
+            />
+          </div>
+        </section>
+
+        {/* Exercícios */}
+        <h2 className="mb-2 mt-8 px-4 text-[13px] uppercase text-label-2">
+          Exercícios · {treino.exercicios.length}
+        </h2>
+        <ol className="space-y-4">
+          {treino.exercicios.map((ex, idx) => (
+            <CartaoExercicio
+              key={ex.id}
+              ex={ex}
+              numero={idx + 1}
+              feitas={feitas[ex.id] ?? []}
+              onAlternar={(i) => alternar(ex, i)}
+              onDescanso={() => iniciarDescanso(ex)}
+            />
+          ))}
+        </ol>
+
+        <button
+          onClick={recomecar}
+          className="mt-8 h-[50px] w-full rounded-[14px] bg-card text-[17px] text-red active:bg-fill"
+        >
+          Recomeçar treino
+        </button>
+      </main>
+
+      {/* Temporizador */}
+      {(temp || terminou) && (
+        <div className="fixed inset-x-0 bottom-0 z-50 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+          <div className="mx-auto max-w-xl overflow-hidden rounded-[22px] border border-sep bg-bar shadow-[0_8px_40px_rgba(0,0,0,0.18)] backdrop-blur-2xl backdrop-saturate-150">
             {temp ? (
               <>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-base opacity-90">Descanso · {temp.nome}</p>
-                  <p className="text-5xl font-extrabold tabular-nums">{formatar(restante)}</p>
+                <div className="flex items-center gap-3 p-4">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-[13px] text-label-2">Descanso · {temp.nome}</p>
+                    <p className="text-[44px] font-semibold leading-none tracking-tight tabular-nums">
+                      {relogio(restante)}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setTemp((t) => t && { ...t, fim: t.fim + 15000, total: t.total + 15 })}
+                    className="h-11 rounded-full bg-fill px-4 text-[15px] font-semibold active:bg-fill-strong"
+                  >
+                    +15 s
+                  </button>
+                  <button
+                    onClick={() => setTemp(null)}
+                    className="h-11 rounded-full bg-accent px-5 text-[15px] font-semibold text-white active:opacity-80"
+                  >
+                    Parar
+                  </button>
                 </div>
-                <button
-                  onClick={() => setTemp((t) => t && { ...t, fim: t.fim + 15000 })}
-                  className="rounded-2xl bg-white/20 px-4 py-4 text-lg font-bold active:bg-white/30"
-                >
-                  +15s
-                </button>
-                <button
-                  onClick={() => setTemp(null)}
-                  className="rounded-2xl bg-white px-4 py-4 text-lg font-bold text-stone-900 active:bg-stone-200"
-                >
-                  Parar
-                </button>
+                <div className="h-1 bg-fill">
+                  <div
+                    className="h-full bg-accent transition-[width] duration-300 ease-linear"
+                    style={{ width: `${(restante / temp.total) * 100}%` }}
+                  />
+                </div>
               </>
             ) : (
-              <p className="flex-1 py-3 text-center text-2xl font-bold">⏰ Descanso terminado! Vamos!</p>
+              <div className="flex items-center justify-center gap-2 p-5 text-[17px] font-semibold">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent text-white">
+                  <Visto className="h-4 w-4" />
+                </span>
+                Descanso terminado
+              </div>
             )}
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
 
 function CartaoExercicio({
   ex,
   numero,
-  slug,
   feitas,
   onAlternar,
   onDescanso,
 }: {
   ex: Exercicio;
   numero: number;
-  slug: Treino["slug"];
   feitas: boolean[];
   onAlternar: (i: number) => void;
   onDescanso: () => void;
 }) {
-  const c = tema[slug];
   const [videoAtivo, setVideoAtivo] = useState(0);
   const videos = ex.videos.slice(0, 2);
   const completo = Array.from({ length: ex.series }).every((_, i) => feitas[i]);
 
   return (
-    <li className={`overflow-hidden rounded-3xl bg-white shadow-sm dark:bg-stone-900 ${completo ? "opacity-70" : ""}`}>
-      <div className="p-5">
-        <div className="flex items-start gap-3">
-          <span
-            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xl font-bold text-white ${c.fundo}`}
-          >
-            {completo ? "✓" : numero}
-          </span>
-          <h2 className="pt-1 text-2xl font-bold leading-tight">{ex.nome}</h2>
-        </div>
-
-        {/* Séries / reps / descanso */}
-        <dl className="mt-4 grid grid-cols-3 gap-2 text-center">
-          <Dado rotulo="Séries" valor={String(ex.series)} />
-          <Dado rotulo="Repetições" valor={ex.repeticoes} />
-          <Dado rotulo="Descanso" valor={ex.descansoSeg ? `${ex.descansoSeg}s` : "—"} />
-        </dl>
-
-        {ex.notas && (
-          <p className={`mt-4 rounded-2xl p-4 text-lg leading-snug ${c.fundoSuave}`}>💡 {ex.notas}</p>
-        )}
+    <li className="overflow-hidden rounded-[14px] bg-card">
+      {/* Cabeçalho */}
+      <div className="flex items-start gap-3 px-4 pt-4">
+        <span
+          className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[15px] font-semibold tabular-nums ${
+            completo ? "bg-accent text-white" : "bg-fill text-label-2"
+          }`}
+        >
+          {completo ? <Visto className="h-4 w-4" /> : numero}
+        </span>
+        <h3 className="text-[20px] font-semibold leading-snug">{ex.nome}</h3>
       </div>
+
+      {/* Séries · Repetições · Descanso */}
+      <dl className="mx-4 mt-4 grid grid-cols-3 divide-x divide-sep rounded-[12px] bg-fill py-2.5">
+        <Dado rotulo="Séries" valor={String(ex.series)} />
+        <Dado rotulo="Repetições" valor={ex.repeticoes} />
+        <Dado rotulo="Descanso" valor={ex.descansoSeg ? formatarDescanso(ex.descansoSeg) : "—"} />
+      </dl>
+
+      {ex.notas && <p className="px-4 pt-3 text-[15px] leading-snug text-label-2">{ex.notas}</p>}
 
       {/* Vídeos */}
       {videos.length > 0 && (
-        <div className="px-5 pb-2">
-          {videos.length > 1 && (
-            <div className="mb-3 grid grid-cols-2 gap-2" role="tablist">
+        <div className="px-4 pt-4">
+          {videos.length > 1 ? (
+            <div className="mb-3 grid grid-cols-2 rounded-[9px] bg-fill p-0.5" role="tablist">
               {videos.map((v, i) => (
                 <button
                   key={i}
                   role="tab"
                   aria-selected={videoAtivo === i}
                   onClick={() => setVideoAtivo(i)}
-                  className={`rounded-xl border-2 py-3 text-lg font-semibold ${
-                    videoAtivo === i
-                      ? `${c.fundo} border-transparent text-white`
-                      : "border-stone-300 bg-transparent dark:border-stone-700"
+                  className={`h-9 rounded-[7px] text-[15px] font-medium transition ${
+                    videoAtivo === i ? "bg-card font-semibold shadow-[0_1px_4px_rgba(0,0,0,0.12)]" : "text-label"
                   }`}
                 >
                   {v.label}
                 </button>
               ))}
             </div>
+          ) : (
+            <p className="mb-2 text-[13px] uppercase text-label-2">{videos[0].label}</p>
           )}
-          {videos.length === 1 && (
-            <p className="mb-2 text-base font-semibold text-stone-500 dark:text-stone-400">{videos[0].label}</p>
-          )}
-          <Video key={videos[videoAtivo].url} url={videos[videoAtivo].url} titulo={`${ex.nome} — ${videos[videoAtivo].label}`} />
+          <Video
+            key={videos[videoAtivo].url}
+            url={videos[videoAtivo].url}
+            titulo={`${ex.nome} — ${videos[videoAtivo].label}`}
+          />
         </div>
       )}
 
       {/* Marcar séries */}
-      <div className="p-5">
-        <p className="mb-3 text-base font-semibold text-stone-500 dark:text-stone-400">Toca para marcar cada série feita</p>
+      <div className="mt-4 border-t border-sep p-4">
+        <p className="mb-3 text-[13px] uppercase text-label-2">Séries feitas</p>
         <div className="flex flex-wrap gap-3">
           {Array.from({ length: ex.series }).map((_, i) => {
             const feita = !!feitas[i];
@@ -277,11 +322,11 @@ function CartaoExercicio({
                 onClick={() => onAlternar(i)}
                 aria-pressed={feita}
                 aria-label={`Série ${i + 1}${feita ? " feita" : ""}`}
-                className={`flex h-16 w-16 items-center justify-center rounded-full border-4 text-2xl font-bold transition active:scale-90 ${
-                  feita ? `${c.bolinha} text-white` : "border-stone-300 text-stone-400 dark:border-stone-600"
+                className={`flex h-[52px] w-[52px] items-center justify-center rounded-full text-[19px] font-semibold tabular-nums transition active:scale-90 ${
+                  feita ? "bg-accent text-white" : "border-2 border-fill-strong text-label-2"
                 }`}
               >
-                {feita ? "✓" : i + 1}
+                {feita ? <Visto className="h-6 w-6" /> : i + 1}
               </button>
             );
           })}
@@ -290,9 +335,10 @@ function CartaoExercicio({
         {ex.descansoSeg ? (
           <button
             onClick={onDescanso}
-            className={`mt-5 w-full rounded-2xl border-2 py-4 text-xl font-bold ${c.borda} ${c.texto} active:opacity-70`}
+            className="mt-4 flex h-[50px] w-full items-center justify-center gap-2 rounded-[12px] bg-accent/15 text-[17px] font-semibold text-accent active:bg-accent/25"
           >
-            ⏱ Descanso {ex.descansoSeg}s
+            <Relogio className="h-5 w-5" />
+            Iniciar descanso · {formatarDescanso(ex.descansoSeg)}
           </button>
         ) : null}
       </div>
@@ -302,9 +348,9 @@ function CartaoExercicio({
 
 function Dado({ rotulo, valor }: { rotulo: string; valor: string }) {
   return (
-    <div className="rounded-2xl bg-stone-100 px-2 py-3 dark:bg-stone-800">
-      <dt className="text-sm font-medium uppercase tracking-wide text-stone-500 dark:text-stone-400">{rotulo}</dt>
-      <dd className="mt-1 text-xl font-bold leading-tight">{valor}</dd>
+    <div className="px-2 text-center">
+      <dt className="text-[12px] text-label-2">{rotulo}</dt>
+      <dd className="mt-0.5 text-[17px] font-semibold leading-tight">{valor}</dd>
     </div>
   );
 }

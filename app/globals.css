@@ -1,7 +1,61 @@
 @import "tailwindcss";
 
+/* Cores ao estilo iOS (claro / escuro) */
 :root {
   color-scheme: light dark;
+  --bg: #f2f2f7;
+  --card: #ffffff;
+  --fill: rgba(120, 120, 128, 0.12);
+  --fill-strong: rgba(120, 120, 128, 0.2);
+  --label: #000000;
+  --label-2: rgba(60, 60, 67, 0.6);
+  --label-3: rgba(60, 60, 67, 0.3);
+  --sep: rgba(60, 60, 67, 0.18);
+  --bar: rgba(249, 249, 249, 0.8);
+  --red: #ff3b30;
+  --accent: #007aff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --card: #1c1c1e;
+    --fill: rgba(118, 118, 128, 0.24);
+    --fill-strong: rgba(118, 118, 128, 0.36);
+    --label: #ffffff;
+    --label-2: rgba(235, 235, 245, 0.6);
+    --label-3: rgba(235, 235, 245, 0.3);
+    --sep: rgba(84, 84, 88, 0.6);
+    --bar: rgba(22, 22, 24, 0.8);
+    --red: #ff453a;
+    --accent: #0a84ff;
+  }
+}
+
+/* Cor de destaque de cada treino (cores de sistema da Apple) */
+.t-push  { --accent: #ff9500; }
+.t-pull  { --accent: #007aff; }
+.t-misto { --accent: #34c759; }
+@media (prefers-color-scheme: dark) {
+  .t-push  { --accent: #ff9f0a; }
+  .t-pull  { --accent: #0a84ff; }
+  .t-misto { --accent: #30d158; }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-card: var(--card);
+  --color-fill: var(--fill);
+  --color-fill-strong: var(--fill-strong);
+  --color-label: var(--label);
+  --color-label-2: var(--label-2);
+  --color-label-3: var(--label-3);
+  --color-sep: var(--sep);
+  --color-bar: var(--bar);
+  --color-red: var(--red);
+  --color-accent: var(--accent);
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
 }
 
 html {
@@ -10,6 +64,8 @@ html {
 }
 
 body {
-  @apply bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-100;
-  font-size: 18px;
+  background: var(--bg);
+  color: var(--label);
+  font-size: 17px;
+  letter-spacing: -0.01em;
 }

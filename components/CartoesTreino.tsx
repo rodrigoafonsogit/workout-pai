@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { treinos, type Treino } from "@/data/treinos";
-import { diaCompleto, diaNumero, tema } from "@/lib/tema";
+import { diaNumero, temaClasse } from "@/lib/tema";
+import { Chevron, IconeTreino } from "./Icones";
 
 function proximoTreino(hoje: number): { treino: Treino; emDias: number } {
   let melhor = { treino: treinos[0], emDias: 8 };
@@ -14,19 +15,27 @@ function proximoTreino(hoje: number): { treino: Treino; emDias: number } {
   return melhor;
 }
 
-function quando(emDias: number) {
-  return emDias === 1 ? "amanhã" : `daqui a ${emDias} dias`;
+const quando = (emDias: number) => (emDias === 1 ? "amanhã" : `daqui a ${emDias} dias`);
+
+function dataHoje(d: Date) {
+  const s = d.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" });
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function saudacao(hora: number) {
-  if (hora < 6) return "Boa noite";
-  if (hora < 13) return "Bom dia";
-  if (hora < 20) return "Boa tarde";
-  return "Boa noite";
+function IconeQuadrado({ slug, grande = false }: { slug: Treino["slug"]; grande?: boolean }) {
+  return (
+    <span
+      className={`${temaClasse[slug]} flex shrink-0 items-center justify-center bg-accent text-white ${
+        grande ? "h-12 w-12 rounded-[12px]" : "h-9 w-9 rounded-[9px]"
+      }`}
+    >
+      <IconeTreino slug={slug} className={grande ? "h-6 w-6" : "h-5 w-5"} />
+    </span>
+  );
 }
 
 export default function CartoesTreino() {
-  // Calculado só no telemóvel (cliente), para usar a data e hora certas.
+  // Calculado só no telemóvel (cliente), para usar a data certa.
   const [agora, setAgora] = useState<Date | null>(null);
   useEffect(() => setAgora(new Date()), []);
 
@@ -36,56 +45,70 @@ export default function CartoesTreino() {
 
   return (
     <>
-      <p className="mt-2 min-h-[1.75rem] text-xl text-stone-600 dark:text-stone-400">
-        {agora ? `${saudacao(agora.getHours())}, pai! 💪` : ""}
-      </p>
+      <p className="h-5 text-[13px] font-semibold uppercase tracking-wide text-label-2">{agora ? dataHoje(agora) : ""}</p>
+      <h1 className="mt-1 text-[34px] font-bold leading-tight tracking-tight">Treino do Pai</h1>
 
-      <div className="mt-6 min-h-[4.5rem] rounded-2xl bg-white p-4 text-lg font-semibold shadow-sm dark:bg-stone-900">
+      {/* Hoje */}
+      <h2 className="mb-2 mt-8 px-4 text-[13px] uppercase text-label-2">Hoje</h2>
+      <section className="min-h-[148px] rounded-[14px] bg-card">
         {treinoHoje && (
-          <span>
-            Hoje é dia de <span className={tema[treinoHoje.slug].texto}>{treinoHoje.titulo}</span>. Bom treino!
-          </span>
+          <div className={`${temaClasse[treinoHoje.slug]} p-4`}>
+            <div className="flex items-center gap-3">
+              <IconeQuadrado slug={treinoHoje.slug} grande />
+              <div>
+                <p className="text-[22px] font-bold leading-tight">Treino {treinoHoje.titulo}</p>
+                <p className="text-[15px] text-label-2">
+                  {treinoHoje.descricao} · {treinoHoje.exercicios.length} exercícios
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/treino/${treinoHoje.slug}`}
+              className="mt-4 flex h-[50px] items-center justify-center rounded-[12px] bg-accent text-[17px] font-semibold text-white active:opacity-80"
+            >
+              Começar treino
+            </Link>
+          </div>
         )}
         {proximo && (
-          <span>
-            Hoje é dia de descanso.
-            <br />
-            Próximo treino:{" "}
-            <span className={tema[proximo.treino.slug].texto}>
-              {proximo.treino.dia} — {proximo.treino.titulo}
-            </span>{" "}
-            <span className="font-normal text-stone-500 dark:text-stone-400">({quando(proximo.emDias)})</span>
-          </span>
+          <div className="p-4">
+            <p className="text-[22px] font-bold leading-tight">Dia de descanso</p>
+            <p className="mt-0.5 text-[15px] text-label-2">Recupera bem. O próximo treino é {quando(proximo.emDias)}.</p>
+            <Link
+              href={`/treino/${proximo.treino.slug}`}
+              className="mt-4 flex items-center gap-3 rounded-[12px] bg-fill p-3 active:bg-fill-strong"
+            >
+              <IconeQuadrado slug={proximo.treino.slug} />
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] text-label-2">Próximo · {proximo.treino.dia}</p>
+                <p className="font-semibold">Treino {proximo.treino.titulo}</p>
+              </div>
+              <Chevron className="h-4 w-4 text-label-3" />
+            </Link>
+          </div>
         )}
-      </div>
+      </section>
 
-      <ul className="mt-6 space-y-4">
-        {treinos.map((t) => {
-          const c = tema[t.slug];
+      {/* Semana */}
+      <h2 className="mb-2 mt-8 px-4 text-[13px] uppercase text-label-2">Esta semana</h2>
+      <ul className="overflow-hidden rounded-[14px] bg-card">
+        {treinos.map((t, i) => {
           const eHoje = treinoHoje?.slug === t.slug;
-          const eProximo = proximo?.treino.slug === t.slug;
           return (
             <li key={t.slug}>
-              <Link
-                href={`/treino/${t.slug}`}
-                className={`block overflow-hidden rounded-3xl bg-white shadow-sm transition active:scale-[0.98] dark:bg-stone-900 ${
-                  eHoje ? `ring-4 ${c.anel}` : ""
-                }`}
-              >
-                <div className={`${c.fundo} flex items-center justify-between px-5 py-3 text-white`}>
-                  <span className="text-lg font-semibold uppercase tracking-wide">{diaCompleto[t.dia]}</span>
-                  {eHoje && <span className="rounded-full bg-white px-3 py-1 text-base font-bold text-stone-900">HOJE</span>}
-                  {eProximo && <span className="rounded-full bg-white/25 px-3 py-1 text-base font-semibold">Próximo</span>}
-                </div>
-                <div className="flex items-center justify-between gap-4 px-5 py-5">
-                  <div>
-                    <p className={`text-4xl font-extrabold ${c.texto}`}>{t.titulo}</p>
-                    {t.descricao && <p className="mt-1 text-lg text-stone-600 dark:text-stone-300">{t.descricao}</p>}
-                    <p className="mt-1 text-base text-stone-500 dark:text-stone-400">{t.exercicios.length} exercícios</p>
+              <Link href={`/treino/${t.slug}`} className="flex items-center gap-3 pl-4 active:bg-fill">
+                <IconeQuadrado slug={t.slug} />
+                <div className={`flex min-w-0 flex-1 items-center gap-2 py-3 pr-4 ${i > 0 ? "border-t border-sep" : ""}`}>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[17px] font-semibold">{t.titulo}</p>
+                    <p className="truncate text-[15px] text-label-2">
+                      {t.dia} · {t.descricao}
+                    </p>
                   </div>
-                  <span aria-hidden className={`text-4xl ${c.texto}`}>
-                    ›
-                  </span>
+                  {eHoje && (
+                    <span className={`${temaClasse[t.slug]} text-[15px] font-semibold text-accent`}>Hoje</span>
+                  )}
+                  <Chevron className="h-4 w-4 shrink-0 text-label-3" />
                 </div>
               </Link>
             </li>

@@ -16,17 +16,15 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#f5f5f4" },
-    { media: "(prefers-color-scheme: dark)", color: "#0c0a09" },
+    { media: "(prefers-color-scheme: light)", color: "#f2f2f7" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-PT">
-      <body className="min-h-dvh antialiased">
-        <div className="mx-auto max-w-xl px-4 pb-32 pt-[max(1.5rem,env(safe-area-inset-top))]">{children}</div>
-      </body>
+      <body className="min-h-dvh font-sans antialiased">{children}</body>
     </html>
   );
 }
