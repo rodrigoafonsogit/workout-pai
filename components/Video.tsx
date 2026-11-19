@@ -64,7 +64,7 @@ export default function Video({ url, titulo }: { url: string; titulo: string }) 
     return (
       <video
         key={url}
-        className="max-h-[70vh] w-full rounded-[12px] bg-black"
+        className="mx-auto max-h-[70vh] w-full rounded-[12px] bg-black object-contain"
         src={url}
         controls
         playsInline
