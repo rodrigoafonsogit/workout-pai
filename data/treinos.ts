@@ -23,6 +23,7 @@
  *       (vídeos "Não listados" funcionam e não aparecem em pesquisas)
  *     - Ficheiro .mp4 na pasta public/videos:  "/videos/supino.mp4"
  *       (ou qualquer link direto para um .mp4)
+ *     - Imagem ou ilustração (.svg, .png, .jpg, .gif):  "/ilustracoes/abdominais.svg"
  *     Enquanto o URL tiver "SUBSTITUIR", aparece "Vídeo em breve".
  *
  *  ⚠️ Se mudares o `id` de um exercício, as séries marcadas desse
@@ -187,7 +188,7 @@ export const treinos: Treino[] = [
     slug: "misto",
     dia: "Sexta",
     titulo: "Misto",
-    descricao: "Um pouco de tudo: empurrar e puxar",
+    descricao: "Um pouco de tudo: empurrar, puxar e abdominais",
     exercicios: [
       {
         id: "supino-halteres",
@@ -199,13 +200,13 @@ export const treinos: Treino[] = [
         videos: [{ label: "Pai a fazer", url: "/videos/supino-halteres-pai.mp4" }],
       },
       {
-        id: "remada-unilateral",
-        nome: "Remada unilateral com halter",
+        id: "remada-baixa-polia",
+        nome: "Remada baixa na polia",
         series: 3,
-        repeticoes: "10 (cada lado)",
-        descansoSeg: 60,
-        notas: "Joelho e mão apoiados no banco. Puxa o halter para a anca.",
-        videos: [{ label: "Explicação", url: "https://youtu.be/SUBSTITUIR" }],
+        repeticoes: "12",
+        descansoSeg: 90,
+        notas: "Costas direitas e joelhos ligeiramente fletidos. Puxa até à barriga sem balançar o tronco.",
+        videos: [{ label: "Explicação", url: "/videos/remada-baixa-polia.mp4" }],
       },
       {
         id: "press-ombros-maquina",
@@ -213,28 +214,20 @@ export const treinos: Treino[] = [
         series: 3,
         repeticoes: "12",
         descansoSeg: 90,
+        notas: "Costas encostadas. Não arquear a lombar nem trancar os cotovelos em cima.",
         videos: [
           { label: "Explicação", url: "/videos/press-ombros-maquina.mp4" },
           { label: "Pai a fazer", url: "/videos/press-ombros-maquina-pai.mp4" },
         ],
       },
       {
-        id: "puxada-pega-fechada",
-        nome: "Puxada com pega fechada",
+        id: "puxada-frente",
+        nome: "Puxada à frente na máquina",
         series: 3,
         repeticoes: "12",
         descansoSeg: 90,
-        notas: "Puxa até ao peito, cotovelos junto ao corpo.",
-        videos: [{ label: "Explicação", url: "https://youtu.be/SUBSTITUIR" }],
-      },
-      {
-        id: "mergulhos-banco",
-        nome: "Mergulhos no banco",
-        series: 3,
-        repeticoes: "10",
-        descansoSeg: 60,
-        notas: "Costas perto do banco. Desce só até sentires conforto nos ombros.",
-        videos: [],
+        notas: "Puxa até ao peito, peito para cima. Leva os cotovelos para baixo.",
+        videos: [{ label: "Explicação", url: "/videos/puxada-frente.mp4" }],
       },
       {
         id: "curl-halteres",
@@ -246,13 +239,22 @@ export const treinos: Treino[] = [
         videos: [{ label: "Explicação", url: "/videos/curl-halteres.mp4" }],
       },
       {
-        id: "prancha",
-        nome: "Prancha",
+        id: "triceps-corda",
+        nome: "Tríceps na polia com corda",
         series: 3,
-        repeticoes: "30 seg",
+        repeticoes: "12",
+        descansoSeg: 60,
+        notas: "Cotovelos colados ao corpo. Abre a corda no fim do movimento.",
+        videos: [{ label: "Pai a fazer", url: "/videos/triceps-corda-pai.mp4" }],
+      },
+      {
+        id: "abdominais",
+        nome: "Abdominais (crunch)",
+        series: 3,
+        repeticoes: "15",
         descansoSeg: 45,
-        notas: "Corpo em linha reta, barriga contraída. Não deixes a anca descer.",
-        videos: [{ label: "Explicação", url: "https://youtu.be/SUBSTITUIR" }],
+        notas: "Movimento curto: sobe só até tirar os ombros do chão. Se doer o pescoço, olha para o teto.",
+        videos: [{ label: "Como fazer", url: "/ilustracoes/abdominais.svg" }],
       },
     ],
   },

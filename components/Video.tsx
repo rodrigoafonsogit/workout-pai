@@ -25,6 +25,7 @@ export function youtubeId(url: string): string | null {
 
 const eShort = (url: string) => /youtube\.com\/shorts\//.test(url);
 const eFicheiroVideo = (url: string) => /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(url);
+const eImagem = (url: string) => /\.(svg|png|jpe?g|webp|gif)(\?.*)?$/i.test(url);
 
 function Indisponivel() {
   return (
@@ -58,6 +59,11 @@ export default function Video({ url, titulo }: { url: string; titulo: string }) 
         />
       </div>
     );
+  }
+
+  if (eImagem(url)) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={url} alt={titulo} className="w-full rounded-[12px] bg-fill" onError={() => setErro(true)} />;
   }
 
   if (eFicheiroVideo(url)) {
