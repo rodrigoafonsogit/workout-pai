@@ -109,12 +109,15 @@ export const treinos: Treino[] = [
       },
       {
         id: "triceps-corda",
-        nome: "Tríceps na polia com corda",
+        nome: "Tríceps na polia",
         series: 3,
         repeticoes: "12",
         descansoSeg: 60,
-        notas: "Cotovelos colados ao corpo. Abre a corda no fim do movimento.",
-        videos: [{ label: "Pai a fazer", url: "/videos/triceps-corda-pai.mp4" }],
+        notas: "Cotovelos colados ao corpo e parados. Estica os braços até baixo e sobe devagar.",
+        videos: [
+          { label: "Explicação", url: "/videos/triceps-polia.mp4" },
+          { label: "Pai a fazer", url: "/videos/triceps-corda-pai.mp4" },
+        ],
       },
     ],
   },
@@ -171,15 +174,6 @@ export const treinos: Treino[] = [
         notas: "Braços bem apoiados. Desce devagar até quase esticar.",
         videos: [{ label: "Explicação", url: "/videos/curl-scott.mp4" }],
       },
-      {
-        id: "curl-polia",
-        nome: "Curl de bíceps na polia",
-        series: 3,
-        repeticoes: "12",
-        descansoSeg: 60,
-        notas: "Cotovelo parado junto ao corpo. Sobe e desce com controlo.",
-        videos: [{ label: "Explicação", url: "/videos/curl-polia.mp4" }],
-      },
     ],
   },
 
@@ -222,12 +216,15 @@ export const treinos: Treino[] = [
       },
       {
         id: "triceps-corda",
-        nome: "Tríceps na polia com corda",
+        nome: "Tríceps na polia",
         series: 3,
         repeticoes: "12",
         descansoSeg: 60,
-        notas: "Cotovelos colados ao corpo. Abre a corda no fim do movimento.",
-        videos: [{ label: "Pai a fazer", url: "/videos/triceps-corda-pai.mp4" }],
+        notas: "Cotovelos colados ao corpo e parados. Estica os braços até baixo e sobe devagar.",
+        videos: [
+          { label: "Explicação", url: "/videos/triceps-polia.mp4" },
+          { label: "Pai a fazer", url: "/videos/triceps-corda-pai.mp4" },
+        ],
       },
       {
         id: "abdominais",
