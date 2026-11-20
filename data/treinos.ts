@@ -191,15 +191,6 @@ export const treinos: Treino[] = [
     descricao: "Um pouco de tudo: empurrar, puxar e abdominais",
     exercicios: [
       {
-        id: "supino-halteres",
-        nome: "Supino plano com halteres",
-        series: 3,
-        repeticoes: "10",
-        descansoSeg: 90,
-        notas: "Controla a descida. Junta os halteres em cima sem bater.",
-        videos: [{ label: "Pai a fazer", url: "/videos/supino-halteres-pai.mp4" }],
-      },
-      {
         id: "remada-baixa-polia",
         nome: "Remada baixa na polia",
         series: 3,
@@ -219,15 +210,6 @@ export const treinos: Treino[] = [
           { label: "Explicação", url: "/videos/press-ombros-maquina.mp4" },
           { label: "Pai a fazer", url: "/videos/press-ombros-maquina-pai.mp4" },
         ],
-      },
-      {
-        id: "puxada-frente",
-        nome: "Puxada à frente na máquina",
-        series: 3,
-        repeticoes: "12",
-        descansoSeg: 90,
-        notas: "Puxa até ao peito, peito para cima. Leva os cotovelos para baixo.",
-        videos: [{ label: "Explicação", url: "/videos/puxada-frente.mp4" }],
       },
       {
         id: "curl-halteres",
