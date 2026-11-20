@@ -23,7 +23,7 @@
  *       (vídeos "Não listados" funcionam e não aparecem em pesquisas)
  *     - Ficheiro .mp4 na pasta public/videos:  "/videos/supino.mp4"
  *       (ou qualquer link direto para um .mp4)
- *     - Imagem ou ilustração (.svg, .png, .jpg, .gif):  "/ilustracoes/abdominais.svg"
+ *     - Imagem ou ilustração (.svg, .png, .jpg, .gif):  "/ilustracoes/abdominais.gif"
  *     Enquanto o URL tiver "SUBSTITUIR", aparece "Vídeo em breve".
  *
  *  ⚠️ Se mudares o `id` de um exercício, as séries marcadas desse
@@ -253,8 +253,8 @@ export const treinos: Treino[] = [
         series: 3,
         repeticoes: "15",
         descansoSeg: 45,
-        notas: "Movimento curto: sobe só até tirar os ombros do chão. Se doer o pescoço, olha para o teto.",
-        videos: [{ label: "Como fazer", url: "/ilustracoes/abdominais.svg" }],
+        notas: "Mãos atrás da cabeça sem puxar o pescoço. Sobe só os ombros, expira ao subir e desce devagar. Lombar sempre no chão.",
+        videos: [{ label: "Como fazer", url: "/ilustracoes/abdominais.gif" }],
       },
     ],
   },
