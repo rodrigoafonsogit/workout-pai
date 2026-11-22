@@ -11,6 +11,8 @@
  *     - repeticoes:  texto livre: "10", "8-10", "30 seg", "até à falha"
  *     - descansoSeg: (opcional) segundos de descanso → ativa o temporizador
  *     - notas:       (opcional) dica curta
+ *     - semPeso:     (opcional) true para exercícios sem carga (ex.: abdominais),
+ *                    esconde o campo do peso
  *     - videos:      lista de vídeos (até 2), pode ficar vazia: []
  *     A ordem no ficheiro é a ordem no ecrã.
  *
@@ -26,8 +28,9 @@
  *     - Imagem ou ilustração (.svg, .png, .jpg, .gif):  "/ilustracoes/abdominais.gif"
  *     Enquanto o URL tiver "SUBSTITUIR", aparece "Vídeo em breve".
  *
- *  ⚠️ Se mudares o `id` de um exercício, as séries marcadas desse
- *     exercício no telemóvel são esquecidas (não faz mal nenhum).
+ *  ⚠️ O `id` é usado para guardar as séries e o peso no telemóvel.
+ *     Se mudares o `id`, o peso do último treino desse exercício é esquecido.
+ *     Exercícios com o mesmo `id` em treinos diferentes partilham o peso.
  * ===================================================================
  */
 
@@ -40,6 +43,7 @@ export type Exercicio = {
   repeticoes: string;
   descansoSeg?: number;
   notas?: string;
+  semPeso?: boolean;
   videos: Video[];
 };
 
@@ -229,6 +233,7 @@ export const treinos: Treino[] = [
       {
         id: "abdominais",
         nome: "Abdominais (crunch)",
+        semPeso: true,
         series: 3,
         repeticoes: "15",
         descansoSeg: 45,

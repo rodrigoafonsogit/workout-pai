@@ -51,6 +51,14 @@ videos: [
 
 Enquanto o URL tiver a palavra `SUBSTITUIR` (ou se o ficheiro não existir), aparece "Vídeo em breve".
 
+## Pesos e progresso
+
+- Em cada exercício aparece o peso do **último treino** (ou "Primeiro registo") e um campo **Peso de hoje** (aceita decimais, ex.: 7,5).
+- Ao carregar em **Concluir treino**, os pesos de hoje passam a ser o "último treino" da próxima vez. Se o treino não for concluído, os pesos são guardados automaticamente quando o treino voltar a ser aberto noutro dia.
+- Exercícios com o mesmo `id` em treinos diferentes (ex.: press de ombros no Push e no Misto) partilham o mesmo peso.
+- Tudo fica guardado no telemóvel (localStorage): não há base de dados nem login. Se se apagar os dados do browser ou se mudar de telemóvel, o histórico recomeça.
+- Para exercícios sem carga (ex.: abdominais), usa `semPeso: true` em `data/treinos.ts`.
+
 ## Deploy na Vercel
 
 1. Cria um repositório no GitHub e faz push deste projeto:

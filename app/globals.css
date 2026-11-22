@@ -1,59 +1,73 @@
 @import "tailwindcss";
 
-/* Cores ao estilo iOS (claro / escuro) */
+/* Paleta: fundo cinzento muito suave, cartões brancos, verde como destaque. */
 :root {
   color-scheme: light dark;
-  --bg: #f2f2f7;
+  --bg: #f4f6f5;
   --card: #ffffff;
-  --fill: rgba(120, 120, 128, 0.12);
-  --fill-strong: rgba(120, 120, 128, 0.2);
-  --label: #000000;
-  --label-2: rgba(60, 60, 67, 0.6);
-  --label-3: rgba(60, 60, 67, 0.3);
-  --sep: rgba(60, 60, 67, 0.18);
-  --bar: rgba(249, 249, 249, 0.8);
-  --red: #ff3b30;
-  --accent: #007aff;
+  --line: #e3e7e4;
+  --fill: #eef1ef;
+  --fill-strong: #dde3df;
+  --label: #111814;
+  --label-2: #4f5a53; /* texto secundário com bom contraste (7:1) */
+  --label-3: #8a948d;
+  --bar: rgba(255, 255, 255, 0.86);
+  --red: #c62828;
+  --green: #15803d; /* botões: texto branco com contraste 5:1 */
+  --on-green: #ffffff;
+  --green-soft: #e7f6ec;
+  --green-text: #166534;
+  --green-ring: #22c55e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #000000;
-    --card: #1c1c1e;
-    --fill: rgba(118, 118, 128, 0.24);
-    --fill-strong: rgba(118, 118, 128, 0.36);
-    --label: #ffffff;
-    --label-2: rgba(235, 235, 245, 0.6);
-    --label-3: rgba(235, 235, 245, 0.3);
-    --sep: rgba(84, 84, 88, 0.6);
-    --bar: rgba(22, 22, 24, 0.8);
-    --red: #ff453a;
-    --accent: #0a84ff;
+    --bg: #0c0f0d;
+    --card: #171b18;
+    --line: #262c28;
+    --fill: #20261f;
+    --fill-strong: #2c342d;
+    --label: #f3f6f4;
+    --label-2: #b3bdb6;
+    --label-3: #78827b;
+    --bar: rgba(23, 27, 24, 0.88);
+    --red: #ff6b6b;
+    --green: #34d06a;
+    --on-green: #06210f;
+    --green-soft: #15291b;
+    --green-text: #6ee79a;
+    --green-ring: #34d06a;
   }
 }
 
-/* Cor de destaque de cada treino (cores de sistema da Apple) */
-.t-push  { --accent: #ff9500; }
-.t-pull  { --accent: #007aff; }
-.t-misto { --accent: #34c759; }
+/* Cor do ícone de cada treino (só para distinguir os cartões). */
+.t-push  { --icone: #f97316; --icone-soft: #fff1e6; }
+.t-pull  { --icone: #2563eb; --icone-soft: #e8f0ff; }
+.t-misto { --icone: #15803d; --icone-soft: #e7f6ec; }
 @media (prefers-color-scheme: dark) {
-  .t-push  { --accent: #ff9f0a; }
-  .t-pull  { --accent: #0a84ff; }
-  .t-misto { --accent: #30d158; }
+  .t-push  { --icone: #fb923c; --icone-soft: #2d1d10; }
+  .t-pull  { --icone: #60a5fa; --icone-soft: #142238; }
+  .t-misto { --icone: #34d06a; --icone-soft: #15291b; }
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-card: var(--card);
+  --color-line: var(--line);
   --color-fill: var(--fill);
   --color-fill-strong: var(--fill-strong);
   --color-label: var(--label);
   --color-label-2: var(--label-2);
   --color-label-3: var(--label-3);
-  --color-sep: var(--sep);
   --color-bar: var(--bar);
   --color-red: var(--red);
-  --color-accent: var(--accent);
+  --color-green: var(--green);
+  --color-on-green: var(--on-green);
+  --color-green-soft: var(--green-soft);
+  --color-green-text: var(--green-text);
+  --color-green-ring: var(--green-ring);
+  --color-icone: var(--icone);
+  --color-icone-soft: var(--icone-soft);
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", system-ui, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
 }
@@ -66,6 +80,32 @@ html {
 body {
   background: var(--bg);
   color: var(--label);
-  font-size: 17px;
-  letter-spacing: -0.01em;
+  font-size: 18px;
+  line-height: 1.4;
 }
+
+/* Animações discretas */
+@keyframes entrar {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes pop {
+  0% { transform: scale(0.85); }
+  60% { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+@keyframes subir {
+  from { transform: translateY(100%); }
+  to { transform: none; }
+}
+.anim-entrar { animation: entrar 0.35s ease-out both; }
+.anim-pop { animation: pop 0.3s ease-out; }
+.anim-subir { animation: subir 0.3s ease-out both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .anim-entrar, .anim-pop, .anim-subir { animation: none; }
+}
+
+/* Remove as setas dos campos numéricos */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }

@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { treinos, type Treino } from "@/data/treinos";
-import { diaNumero, temaClasse } from "@/lib/tema";
-import { Chevron, IconeTreino } from "./Icones";
+import { resumoSessao } from "@/lib/registo";
+import { diaCompleto, diaNumero, duracaoEstimada, temaClasse } from "@/lib/tema";
+import { Chevron, IconeTreino, Relogio } from "./Icones";
 
 function proximoTreino(hoje: number): { treino: Treino; emDias: number } {
   let melhor = { treino: treinos[0], emDias: 8 };
@@ -17,99 +18,109 @@ function proximoTreino(hoje: number): { treino: Treino; emDias: number } {
 
 const quando = (emDias: number) => (emDias === 1 ? "amanhã" : `daqui a ${emDias} dias`);
 
-function dataHoje(d: Date) {
-  const s = d.toLocaleDateString("pt-PT", { weekday: "long", day: "numeric", month: "long" });
-  return s.charAt(0).toUpperCase() + s.slice(1);
-}
-
-function IconeQuadrado({ slug, grande = false }: { slug: Treino["slug"]; grande?: boolean }) {
-  return (
-    <span
-      className={`${temaClasse[slug]} flex shrink-0 items-center justify-center bg-accent text-white ${
-        grande ? "h-12 w-12 rounded-[12px]" : "h-9 w-9 rounded-[9px]"
-      }`}
-    >
-      <IconeTreino slug={slug} className={grande ? "h-6 w-6" : "h-5 w-5"} />
-    </span>
-  );
-}
+type Resumo = { concluidos: number; comecado: boolean };
 
 export default function CartoesTreino() {
-  // Calculado só no telemóvel (cliente), para usar a data certa.
-  const [agora, setAgora] = useState<Date | null>(null);
-  useEffect(() => setAgora(new Date()), []);
+  // Calculado só no telemóvel (cliente), para usar a data certa e o progresso guardado.
+  const [diaHoje, setDiaHoje] = useState<number | null>(null);
+  const [resumos, setResumos] = useState<Record<string, Resumo>>({});
 
-  const diaHoje = agora?.getDay();
-  const treinoHoje = treinos.find((t) => diaNumero[t.dia] === diaHoje);
-  const proximo = diaHoje !== undefined && !treinoHoje ? proximoTreino(diaHoje) : null;
+  useEffect(() => {
+    setDiaHoje(new Date().getDay());
+    const r: Record<string, Resumo> = {};
+    for (const t of treinos) {
+      r[t.slug] = resumoSessao(t.slug, Object.fromEntries(t.exercicios.map((e) => [e.id, e.series])));
+    }
+    setResumos(r);
+  }, []);
+
+  const treinoHoje = diaHoje === null ? undefined : treinos.find((t) => diaNumero[t.dia] === diaHoje);
+  const proximo = diaHoje !== null && !treinoHoje ? proximoTreino(diaHoje) : null;
+  const recomendado = treinoHoje?.slug ?? proximo?.treino.slug;
 
   return (
     <>
-      <p className="h-5 text-[13px] font-semibold uppercase tracking-wide text-label-2">{agora ? dataHoje(agora) : ""}</p>
-      <h1 className="mt-1 text-[34px] font-bold leading-tight tracking-tight">Treino do Pai</h1>
+      <header className="anim-entrar">
+        <h1 className="text-[34px] font-extrabold leading-tight tracking-tight">Olá! Vamos treinar?</h1>
+        <p className="mt-2 min-h-[3.25rem] text-[19px] leading-snug text-label-2">
+          {treinoHoje && (
+            <>
+              Hoje é dia de <strong className="text-label">{treinoHoje.titulo}</strong>. Carrega no botão verde para
+              começar.
+            </>
+          )}
+          {proximo && (
+            <>
+              Hoje é dia de descanso. O próximo treino é{" "}
+              <strong className="text-label">
+                {proximo.treino.titulo} ({proximo.treino.dia.toLowerCase()})
+              </strong>
+              , {quando(proximo.emDias)}.
+            </>
+          )}
+        </p>
+      </header>
 
-      {/* Hoje */}
-      <h2 className="mb-2 mt-8 px-4 text-[13px] uppercase text-label-2">Hoje</h2>
-      <section className="min-h-[148px] rounded-[14px] bg-card">
-        {treinoHoje && (
-          <div className={`${temaClasse[treinoHoje.slug]} p-4`}>
-            <div className="flex items-center gap-3">
-              <IconeQuadrado slug={treinoHoje.slug} grande />
-              <div>
-                <p className="text-[22px] font-bold leading-tight">Treino {treinoHoje.titulo}</p>
-                <p className="text-[15px] text-label-2">
-                  {treinoHoje.descricao} · {treinoHoje.exercicios.length} exercícios
-                </p>
-              </div>
-            </div>
-            <Link
-              href={`/treino/${treinoHoje.slug}`}
-              className="mt-4 flex h-[50px] items-center justify-center rounded-[12px] bg-accent text-[17px] font-semibold text-white active:opacity-80"
-            >
-              Começar treino
-            </Link>
-          </div>
-        )}
-        {proximo && (
-          <div className="p-4">
-            <p className="text-[22px] font-bold leading-tight">Dia de descanso</p>
-            <p className="mt-0.5 text-[15px] text-label-2">Recupera bem. O próximo treino é {quando(proximo.emDias)}.</p>
-            <Link
-              href={`/treino/${proximo.treino.slug}`}
-              className="mt-4 flex items-center gap-3 rounded-[12px] bg-fill p-3 active:bg-fill-strong"
-            >
-              <IconeQuadrado slug={proximo.treino.slug} />
-              <div className="min-w-0 flex-1">
-                <p className="text-[13px] text-label-2">Próximo · {proximo.treino.dia}</p>
-                <p className="font-semibold">Treino {proximo.treino.titulo}</p>
-              </div>
-              <Chevron className="h-4 w-4 text-label-3" />
-            </Link>
-          </div>
-        )}
-      </section>
-
-      {/* Semana */}
-      <h2 className="mb-2 mt-8 px-4 text-[13px] uppercase text-label-2">Esta semana</h2>
-      <ul className="overflow-hidden rounded-[14px] bg-card">
+      <ul className="mt-6 space-y-4">
         {treinos.map((t, i) => {
+          const eRecomendado = recomendado === t.slug;
           const eHoje = treinoHoje?.slug === t.slug;
+          const r = resumos[t.slug];
+          const total = t.exercicios.length;
+          const emCurso = r?.comecado && r.concluidos < total;
           return (
-            <li key={t.slug}>
-              <Link href={`/treino/${t.slug}`} className="flex items-center gap-3 pl-4 active:bg-fill">
-                <IconeQuadrado slug={t.slug} />
-                <div className={`flex min-w-0 flex-1 items-center gap-2 py-3 pr-4 ${i > 0 ? "border-t border-sep" : ""}`}>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-[17px] font-semibold">{t.titulo}</p>
-                    <p className="truncate text-[15px] text-label-2">
-                      {t.dia} · {t.descricao}
-                    </p>
-                  </div>
-                  {eHoje && (
-                    <span className={`${temaClasse[t.slug]} text-[15px] font-semibold text-accent`}>Hoje</span>
+            <li key={t.slug} className="anim-entrar" style={{ animationDelay: `${60 * (i + 1)}ms` }}>
+              <Link
+                href={`/treino/${t.slug}`}
+                className={`${temaClasse[t.slug]} block rounded-[24px] border bg-card p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition active:scale-[0.98] ${
+                  eRecomendado ? "border-green-ring border-2" : "border-line"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[15px] font-bold uppercase tracking-wider text-label-2">
+                    {diaCompleto[t.dia]}
+                  </span>
+                  {eRecomendado && (
+                    <span className="rounded-full bg-green-soft px-3 py-1 text-[15px] font-bold text-green-text">
+                      {eHoje ? "Treino de hoje" : `Próximo · ${proximo ? quando(proximo.emDias) : ""}`}
+                    </span>
                   )}
-                  <Chevron className="h-4 w-4 shrink-0 text-label-3" />
                 </div>
+
+                <div className="mt-3 flex items-center gap-4">
+                  <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[16px] bg-icone-soft text-icone">
+                    <IconeTreino slug={t.slug} className="h-7 w-7" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-[28px] font-extrabold leading-tight">{t.titulo}</p>
+                    {t.descricao && <p className="text-[17px] leading-snug text-label-2">{t.descricao}</p>}
+                  </div>
+                </div>
+
+                <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-[17px] text-label-2">
+                  <span>
+                    <strong className="font-semibold text-label">{total}</strong> exercícios
+                  </span>
+                  <span className="flex items-center gap-1.5">
+                    <Relogio className="h-[18px] w-[18px]" />
+                    cerca de <strong className="font-semibold text-label">{duracaoEstimada(t.exercicios)} min</strong>
+                  </span>
+                </p>
+
+                {emCurso && (
+                  <p className="mt-3 text-[16px] font-semibold text-green-text">
+                    Em curso: {r.concluidos} de {total} exercícios feitos
+                  </p>
+                )}
+
+                <span
+                  className={`mt-5 flex h-[58px] items-center justify-center gap-2 rounded-[16px] text-[19px] font-bold ${
+                    eRecomendado ? "bg-green text-on-green" : "bg-fill text-label"
+                  }`}
+                >
+                  {emCurso ? "Continuar treino" : eRecomendado ? "Começar treino" : "Ver treino"}
+                  <Chevron className="h-5 w-5" />
+                </span>
               </Link>
             </li>
           );
